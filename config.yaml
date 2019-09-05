@@ -1,0 +1,9 @@
+# Save the project name
+project: '20190904_mixcr_pipeline'
+
+# The directories of derived and metadata
+der_dir: /home/djan/test/derived_data/20190904_mixcr_pipeline
+dat_dir: /home/djan/test/metadata
+
+# All the directories of the different papers
+dirs: ["Bashford_2013", "Bonsignori_2016"]
