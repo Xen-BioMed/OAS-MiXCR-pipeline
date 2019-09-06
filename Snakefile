@@ -11,6 +11,16 @@ DAT_DIR = config["dat_dir"]
 DER_DIR = config["der_dir"]
 
 DIRS = config["dirs"]
+size_dirs = len(DIRS)
+
+# Originally, there are size_dirs different folders in DIRS. Test manually whether
+# this corresponds to the number of folders in metadata. If not, new folders must
+# have been added to metadata, and an error message is printed.
+size_dat_dir = len(os.listdir(DAT_DIR))
+
+if size_dat_dir is not size_dirs:
+    print("There are " + str(size_dat_dir) + " folders in the metadata directory, which is ",
+          "not equal to " + str(size_dirs) + " folders in the DIRS. Make sure to fix this!")
 
 # Save all the sample names
 all_samples = []
@@ -25,40 +35,19 @@ for i in range(0, len(DIRS)):
 	# Append to list
 	all_samples.extend(sample_dir)
 
-# WHY ON EARTH DOES THIS WORK?! WHAT IS THE EFFECT OF ZIP? DOES IT MAKE SURE THAT ONLY ONE PARAMETER IS ENTERED AT A TIME?
-# ARE THERE ALTERNATIVE WAYS OF ACHIEVING THE SAME THING? IF SO, HOW?
-test=expand("{dat_dir}/{sample}.fasta", zip, dat_dir=DAT_DIR, sample=all_samples)
+#rule all:
+#    input:
+#        expand("{der_dir}/{sample}", der_dir=DER_DIR, sample=all_samples)
 
-rule all:
+rule mixcr_analyze:
     input:
-        expand("{der_dir}/{sample}-assemble.report",
-				der_dir=DER_DIR, sample=all_samples),
-        expand("{der_dir}/{sample}.clna",
-				der_dir=DER_DIR, sample=all_samples)
-
-rule mixcr_align:
-    input:
-        test
+        expand("{dat_dir}/{sample}.fasta", zip, dat_dir=DAT_DIR, sample=all_samples)
     output:
-        report="{der_dir}/{sample}-align.report",
-        vdjca="{der_dir}/{sample}.vdjca"
+        "{der_dir}/{sample}", zip, der_dir=DER_DIR, sample=all_samples
     shell:
-        "mixcr align --species hsa --report {output.report} "
-	    "-p rna-seq -OvParameters.geneFeatureToAlign=VTranscriptWithP "
-	    "-OvParameters.parameters.floatingLeftBound=true "
-	    "-OjParameters.parameters.floatingRightBound=false "
-	    "-OcParameters.parameters.floatingRightBound=true "
-	    "{input} {output.vdjca}"
-
-rule mixcr_assemble:
-    input:
-        "{der_dir}/{sample}.vdjca"
-    output:
-        report="{der_dir}/{sample}-assemble.report",
-        clna="{der_dir}/{sample}.clna"
-    shell:
-        "mixcr assemble --report {output.report} "
-	"--write-alignments -OassemblingFeatures=[CDR3] "
-	"-OseparateByJ=true -OseparateByC=false "
-	"-OassemblingFeatures=[CDR1,CDR2,CDR3] "
-	"{input} {output.clna}"
+        "mixcr analyze amplicon -s hsa --starting-material RNA "
+	"--5-end no-v-primers --3-end c-primers --adapters adapters-present "
+	"--export '-aaFeature CDR1 -nFeature CDR1 -aaFeature CDR2 "
+	"-nFeature CDR2 -aaFeature CDR3 -nFeature CDR3 -aaFeature "
+	"VGene -cGenes -count' --assemble "
+	"'-OassemblingFeatures=[CDR1,CDR2,CDR3]' {input} {output}"
