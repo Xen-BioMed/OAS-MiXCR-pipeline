@@ -3,19 +3,22 @@ project: '20190904_mixcr_pipeline'
 
 # The directories of derived and metadata
 der_dir: /home/djan/oas/derived_data/20190904_mixcr_pipeline
-dat_dir: /home/djan/oas/metadata/nucleotides
+fasta_dir: /links/groups/reddy/V_Gene_Data_Analysis/Jan_Dahinden/OAS/nucleotides
+json_dir: /links/groups/reddy/V_Gene_Data_Analysis/Jan_Dahinden/OAS/json
 
 # All the directories of the different papers
 # This could be done with a simple Python command to list all directories.
 # However, I prefer keeping this written down, so that I get an error
 # message whenever more data is added (without me knowing)!
-# dirs: [
-#     "Banerjee_2017", "Bashford_2013", "Bonsignori_2016", "Briney_2019", "Cui_2016", "Doria-Rose_2015",
-#     "Ellebedy_2016", "Galson_2015", "Galson_2016", "Greiff_2014", "Greiff_2015", "Greiff_2017",
-#     "Gupta_2017", "Johnson_2018", "Joyce_2016", "Khan_2016", "Levin_2015", "Levin_2017", "Li_2017",
-#     "Liao_2013", "Lindner_2015", "Meng_2017a", "Menzel_2014", "Mroczek_2014", "Ota_2010",
-#     "Palanichamy_2014", "Parameswaran_2014", "Prohaska_2018", "Setliff_2018a", "Sheng_2017", "Soto_2016",
-#     "Sundling_2014", "Tipton_2015", "VanDuijn_2017", "Vander_Heiden_2017", "Wesemann_2013", "Wu_2011",
-#     "Wu_2014", "Zhou_2013", "Zhou_2015", "Zhu_2012"
-# ]
-dirs: ["Bashford_2013", "Bonsignori_2016"]
+dirs: [
+    'Banerjee_2017', 'Bashford_2013', 'Bhiman_2015', 'Bonsignori_2016', 'Briney_2019', 'Collins_2015',
+    'Corcoran_2016', 'Cui_2016', 'Doria-Rose_2015', 'Ellebedy_2016', 'Fisher_2017', 'Galson_2015',
+    'Galson_2015a', 'Galson_2016', 'Galson_2016a', 'Greiff_2014', 'Greiff_2015', 'Greiff_2017',
+    'Gupta_2017', 'Halliley_2015', 'Huang_2016', 'Jiang_2013', 'Johnson_2018', 'Joyce_2016',
+    'Khan_2016', 'Levin_2015', 'Levin_2017', 'Li_2017', 'Liao_2013', 'Lindner_2015', 'Meng_2017a',
+    'Menzel_2014', 'Mroczek_2014', 'Ota_2010', 'Palanichamy_2014', 'Parameswaran_2014', 'Pei_2017',
+    'Prohaska_2018', 'Rettig_2018', 'Rubelt_2016', 'Schanz_2014', 'Setliff_2018a', 'Sheng_2017',
+    'Soto_2016', 'Stern_2014', 'Sundling_2014', 'Thornqvist_2018', 'Tipton_2015', 'Turchaninova_2016',
+    'VanDuijn_2017', 'Vander_Heiden_2017', 'Vergani_2017', 'Wesemann_2013', 'Wu_2011', 'Wu_2014',
+    'Wu_2015', 'Zhou_2013', 'Zhou_2015', 'Zhu_2012', 'Zhu_2013'
+]
