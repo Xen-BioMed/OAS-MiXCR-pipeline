@@ -1,3 +1,4 @@
+# Load config file
 configfile: "config.yaml"
 
 # Localrules will let the rule run locally rather than submitting to cluster
@@ -5,6 +6,7 @@ localrules: all
 
 # Import packages
 import os
+import pandas as pd
 
 # Set variables from config file
 DER_DIR = config["der_dir"]
@@ -55,8 +57,9 @@ for i in range(0, len(DIRS)):
 rule all:
     input:
         expand("%s/{sample}.fasta" % FASTA_DIR, sample=all_samples),
-	expand("%s/{sample}.clna" % DER_DIR, sample=all_samples),
-        "%s/metadata_all_studies.csv" % DER_DIR
+	expand("%s/{sample}.clonotypes.ALL.txt" % DER_DIR, sample=all_samples),
+        "%s/metadata_all_studies.csv" % DER_DIR,
+	"%s/alignment_all_studies.csv" % DER_DIR"
 	
 rule untar_fasta:
     input:
@@ -70,7 +73,7 @@ rule mixcr_analyze:
     input:
         "%s/{sample}.fasta" % FASTA_DIR
     output:
-        "%s/{sample}.clna" % DER_DIR
+        "%s/{sample}.clonotypes.ALL.txt" % DER_DIR
     params:
         name="%s/{sample}" % DER_DIR
     shell:
@@ -80,6 +83,19 @@ rule mixcr_analyze:
 	"-nFeature CDR2 -aaFeature CDR3 -nFeature CDR3 -aaFeature "
 	"VGene -cGenes -count' --assemble "
 	"'-OassemblingFeatures=[CDR1,CDR2,CDR3]' {input} {params.name}"
+
+rule fuse_alignment_tables:
+    input:
+        expand("%s/{sample}.clonotypes.ALL.txt" % DER_DIR, sample=all_samples)
+    output:
+        "%s/alignment_all_studies.csv" % DER_DIR
+    run:
+        df = pd.DataFrame()
+        for f in input:
+            df_new = pd.read_csv(f, sep="\t")
+            df_new.insert(0, 'sample_id', f.split('/')[-1].split('.')[0])
+            df = df.append(df_new)
+        df.to_csv(output[0], index=False)
 
 rule extract_and_save_metadata:
     input:

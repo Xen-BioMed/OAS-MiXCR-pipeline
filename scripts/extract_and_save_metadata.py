@@ -24,7 +24,7 @@ def return_first_line(src):
     # Insert an additional column, the ID, which is equal
     # to the filename (defined as the entry after the last
     # '/' and before the first '.'.
-    df.insert(0, 'ID', src.split('/')[-1].split('.')[0])
+    df.insert(0, 'sample_id', src.split('/')[-1].split('.')[0])
 
     return(df)
 
