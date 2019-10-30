@@ -1,0 +1,8 @@
+One of the issues is that the untar command should be run in parallel, while the other commands
+should not. Thus, I included "resources: cpu=100" for all the commands that should NOT be
+run in parallel. When specifiying snakemake -j --resources cpu=100, then all those rules will use up all
+the available "cpu" resource, and thus only be run once, instead of multiple times in parallel.
+
+TL;DR:
+
+Run snakemake with following command: snakemake -j --resources cpu=100
