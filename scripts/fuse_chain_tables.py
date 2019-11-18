@@ -3,7 +3,7 @@ import pandas as pd
 import logging
 
 # Logging
-logging.basicConfig(filename=snakemake.log[0], level=logging.DEBUG)
+logging.basicConfig(filename="%s.log" % snakemake.log[0], level=logging.DEBUG)
 
 # Save all inputs
 inputs = snakemake.input

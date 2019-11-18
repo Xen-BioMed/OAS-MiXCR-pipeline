@@ -1,9 +1,6 @@
 # Load config file
 configfile: "config.yaml"
 
-# Localrules will let the rule run locally rather than submitting to cluster
-localrules: all
-
 # Import packages
 import os
 
@@ -33,11 +30,18 @@ assert size_fasta == size_json, (
     "which is not equal to " + str(size_json) + " folders in the json directory."
 )
 
-# IMPORTANT NOTE:
-# There is nothing that currently tests whether there are the same amount
-# of files inside the JSON and FASTA folders. If this was not the case,
-# joining the metadata with the alignment information would lead to missing
-# data.
+# Finally, the number of files inside each of the subdirectories can be
+# compared between FASTA_DIR and JSON_DIR. However, this might be overkill.
+# Also, all hidden files that might be automatically created would break
+# this part of the code!
+size_all_json = sum([len(files) for r, d, files in os.walk("JSON_DIR")])
+size_all_fasta = sum([len(files) for r, d, files in os.walk("FASTA_DIR")])
+assert size_all_json == size_all_fasta, (
+    "There are " + str(size_all_fasta) + " files in the nucleotides " +
+    "directories, which is not equal to " + str(size_all_json) +
+    "files in the json directories."
+)
+
 
 # Save all the sample names
 all_samples = []
@@ -59,9 +63,8 @@ rule all:
     input:
         expand("%s/{sample}.fasta" % FASTA_DIR, sample=all_samples),
 	expand("%s/{sample}.clonotypes.IGH.txt" % ALIGN_DIR, sample=all_samples),
-        "%s/metadata_all_studies.csv" % DER_DIR,
-        # expand("%s/alignment_all_studies_{chain}.csv" % DER_DIR, chain=CHAINS),
-        "%s/alignment_all_studies_and_chains.csv" % DER_DIR
+        "%s/alignment_all_studies_and_chains.csv" % DER_DIR,
+        "%s/metadata_all_studies.csv" % DER_DIR
 
 rule untar_fasta:
     input:
@@ -69,8 +72,15 @@ rule untar_fasta:
     output:
         "%s/{sample}.fasta" % FASTA_DIR
     priority: 1 # run this rule first
+    log:
+        temp("logs/untar_fasta/{sample}")
     shell:
-        "gunzip {input}"
+        "gunzip {input} > {log}.log"
+
+# Note:
+# Due to limited storage capacity, this rule will delete all the *.vdjca and
+# *.clna files right after alignment. Unfortunately, I do not know how to
+# make this files temp(), as they are created automatically by MiXCR.
 
 rule mixcr_analyze:
     input:
@@ -83,14 +93,15 @@ rule mixcr_analyze:
         name="%s/{sample}" % ALIGN_DIR
     resources: cpu=100 # uses 100 "cpu" units
     log:
-        "logs/mixcr_analyze/{sample}.log"
+        temp("logs/mixcr_analyze/{sample}")
     shell:
-        "mixcr analyze amplicon -s hsa --starting-material rna "
+        "mixcr -Xmx95g analyze amplicon -s hsa --starting-material rna "
         "--5-end no-v-primers --3-end c-primers --adapters adapters-present "
         "--receptor-type BCR --only-productive --align '-OreadsLayout=Unknown' "
-        "--assemble '-OassemblingFeatures=[CDR1,CDR2,CDR3]' --export '-aaFeature CDR1 "
-        "-nFeature CDR1 -aaFeature CDR2 -nFeature CDR2 -aaFeature CDR3 -nFeature CDR3 "
-        "-aaFeature VGene -cGenes -count' {input} {params.name} > {log}"
+        "--assemble '-OassemblingFeatures=[CDR1,CDR2,CDR3] -OcloneClusteringParameters=null' "
+        "--export '-aaFeature CDR1 -nFeature CDR1 -aaFeature CDR2 -nFeature CDR2 -aaFeature "
+        "CDR3 -nFeature CDR3 -aaFeature VGene -cGenes -count' "
+        "{input} {params.name} > {log}.log && rm {params.name}.{{vdjca,clna}}"
 
 rule fuse_alignment_tables:
     input:
@@ -100,7 +111,7 @@ rule fuse_alignment_tables:
     params:
         lambda wildcards: wildcards.chains
     log:
-        "logs/fuse_alignment_tables/output_{chains}.log"
+        temp("logs/fuse_alignment_tables/output_{chains}")
     script:
         "scripts/fuse_alignment_tables.py"
 
@@ -112,7 +123,7 @@ rule fuse_chain_tables:
     output:
         "%s/alignment_all_studies_and_chains.csv" % DER_DIR
     log:
-        "logs/fuse_chain_tables/output.log"
+        temp("logs/fuse_chain_tables/output")
     script:
         "scripts/fuse_chain_tables.py"
 
@@ -122,6 +133,6 @@ rule extract_and_save_metadata:
     output:
         "%s/metadata_all_studies.csv" % DER_DIR
     log:
-        "logs/extract_and_save_metadata/output.log"
+        temp("logs/extract_and_save_metadata/output")
     script:
         "scripts/extract_and_save_metadata.py"

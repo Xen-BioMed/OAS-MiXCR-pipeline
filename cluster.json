@@ -1,0 +1,10 @@
+{
+    "__default__": {
+	"nCPUs": "1",
+	"runtime": "24:00",
+	"resources": "rusage[mem=100000]",
+	"name": "JOBNAME.{rule}.{wildcards}",
+	"output": "{log}.out",
+	"error": "{log}.err"
+	}
+}

@@ -32,7 +32,7 @@ def return_first_line(src):
 # MAIN PART OF THE SCRIPT
 
 # Logging
-logging.basicConfig(filename=snakemake.log[0], level=logging.DEBUG)
+logging.basicConfig(filename="%s.log" % snakemake.log[0], level=logging.DEBUG)
 
 # Read all the input files from snakemake
 files = snakemake.input

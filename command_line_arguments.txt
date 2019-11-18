@@ -1,0 +1,76 @@
+Analyze
+-------
+
+This was the actual command that Simon used:
+
+mixcr analyze amplicon -s hsa --starting-material RNA --5-end no-v-primers --3-end c-primers --adapters adapters-present 
+--export "-aaFeature CDR1 -nFeature CDR1 -aaFeature CDR2 -nFeature CDR2 -aaFeature CDR3 -nFeature CDR3 -aaFeature VGene 
+-cGenes -count" --assemble "-OassemblingFeatures=[CDR1,CDR2,CDR3]"
+
+Analyze manages to combine the complicated three-step scenario (align, assemble, export) into a single line, which
+makes the creation of the Snakemake pipeline a lot easier. See here:
+https://mixcr.readthedocs.io/en/master/analyze.html
+
+Here is the explanation of the parameters:
+
+	--starting-material: type of starting material. Ig-Seq starts with RNA.
+	--5-end: no V gene primers (e.g. 5’RACE with template switch oligo or a like), v-primers — V gene single primer / multiple.
+	--3-end: J gene single primer / multiplex; J-C intron single primer / multiplex; 
+			 C gene single primer / multiplex (e.g. IGHC primers specific to different Ig isotypes).
+	--adapters: Presence of PCR primers and/or adapter sequences.
+	--export: export CDR1-3 amino acid and nucleotide sequences.
+	-OassemblingFeatures: assembling clones based on CDR1-3, not only CDR3.
+
+
+Alignment
+---------
+
+The align command aligns raw sequencing reads to reference V, D, J and C genes of T- and B- cell receptors.
+
+Command line arguments:
+
+--species human
+# IMPORTANT
+
+--report ../../output_human/Bashford_2013_CLL_subject-2_IGHG_CLL_subject-2_Age-58_repeat-1_iglblastn_IGHG.report
+# Create a report file
+
+-p kAligner2
+# IMPORTANT
+# Specifically optimized for analysis of BCR data.
+# If this is not used, find out what is!
+
+-OvParameters.geneFeatureToAlign=VTranscriptWithP
+
+# TEST THIS?! FIND DATASET THAT HAS RACE, AND SEE THE DIFFERENT WITH OPTIMIZED VS DEFAULT PARAMETERS
+# LOOK AT PERCENTAGE ALIGNED
+
+Bashford_2013_CLL_subject-2_IGHG_CLL_subject-2_Age-58_repeat-1_iglblastn_IGHG.fasta 
+../../output_human/Bashford_2013_CLL_subject-2_IGHG_CLL_subject-2_Age-58_repeat-1_iglblastn_IGHG.vdjca
+
+
+Assembly
+--------
+
+The assemble command builds clonotypes from alignments obtained with align. Clonotypes assembly is performed for a chosen
+assembling feature (e.g. CDR3 by default).
+
+Command line arguments:
+
+--report ../../output_human/Bashford_2013_CLL_subject-2_IGHG_CLL_subject-2_Age-58_repeat-1_iglblastn_IGHG.report
+# Appends report to previous report file
+
+--write-alignments
+# Save initial alignments and alignments <> clones mapping in the resulting .clna file.
+
+-OassemblingFeatures=[CDR1,CDR2,CDR3]
+# Sets the CDR regions which should be assembled
+
+-OcloneClusteringParameters=null
+# Deactivation of the frequency-based correction of PCR errors (clustering)
+# Should make the script run a lot faster!
+
+# IMPORTANT
+
+./../output_human/Bashford_2013_CLL_subject-2_IGHG_CLL_subject-2_Age-58_repeat-1_iglblastn_IGHG.vdjca
+../../output_human/Bashford_2013_CLL_subject-2_IGHG_CLL_subject-2_Age-58_repeat-1_iglblastn_IGHG.clna
