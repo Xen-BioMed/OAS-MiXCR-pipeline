@@ -1,3 +1,7 @@
+# --------------
+# CONFIGURATION
+# --------------
+
 # Load config file
 configfile: "config.yaml"
 
@@ -42,27 +46,51 @@ assert size_all_json == size_all_fasta, (
     "files in the json directories."
 )
 
-
 # Save all the sample names
 all_samples = []
 for i in range(0, len(DIRS)):
     for f in os.listdir(os.path.join(FASTA_DIR, DIRS[i])):
         # Make sure no hidden files are included
         if not f.startswith("."):
-	    # Save all files inside the current directory
-	    # Split the name on '.' to remove file extensions
-            sample = f.split('.')[0]
+            # Save all files inside the current directory
+            # Split the name on "." to remove file extensions
+            filename = f.split(".")[0]
 
             # Save the current directory name together with the sample name
-            sample_dir = os.path.join(DIRS[i], sample)
+            sample_dir = os.path.join(DIRS[i], filename)
 
             # Append to list
             all_samples.append(sample_dir)
 
+# Create a dictionary of folder and filenames
+# This is needed for the rule "fuse_studies", where all files
+# inside a directory are fused.
+# If possible, try to make all rules use this dictionary instead!
+sample_dict = {}
+for i in range(0, len(DIRS)):
+    # Save path for each directory
+    path = os.path.join(FASTA_DIR, DIRS[i])
+
+    # Make sure no hidden files are included
+    filenames = [f for f in os.listdir(path) if not f.startswith(".")]
+
+    # Save all files inside the current directory
+    # Split the name on "." to remove file extensions
+    filenames = [f.split(".")[0] for f in filenames]
+
+    # Save the filenames with the directory name as key
+    sample_dict[DIRS[i]] = filenames
+
+
+# --------------
+# ALL RULES
+# --------------
+
 rule all:
     input:
         expand("%s/{sample}.fasta" % FASTA_DIR, sample=all_samples),
-	expand("%s/{sample}.clonotypes.IGH.txt" % ALIGN_DIR, sample=all_samples),
+        expand("%s/{sample}.clonotypes.IGH.txt" % ALIGN_DIR, sample=all_samples),
+        expand("%s/{dir}/fused_studies_and_chains.csv" % ALIGN_DIR, dir=DIRS),
         "%s/alignment_all_studies_and_chains.csv" % DER_DIR,
         "%s/metadata_all_studies.csv" % DER_DIR
 
@@ -103,29 +131,42 @@ rule mixcr_analyze:
         "CDR3 -nFeature CDR3 -aaFeature VGene -cGenes -count' "
         "{input} {params.name} > {log}.log && rm {params.name}.{{vdjca,clna}}"
 
-rule fuse_alignment_tables:
+rule fuse_studies:
     input:
-        expand("%s/{sample}.clonotypes.{{chains}}.txt" % ALIGN_DIR, sample=all_samples)
+        lambda wildcards: \
+            ["%s/{dir}/%s.clonotypes.{chains}.txt" % (ALIGN_DIR, filename) \
+                for filename in sample_dict[wildcards.dir]
+            ]
     output:
-        temp("%s/alignment_all_studies_{chains}.csv" % DER_DIR)
+       temp("%s/{dir}/fused_studies_{chains}.csv" % ALIGN_DIR)
     params:
         lambda wildcards: wildcards.chains
     log:
-        temp("logs/fuse_alignment_tables/output_{chains}")
+        temp("logs/fuse_studies/{dir}/output_{chains}")
     script:
-        "scripts/fuse_alignment_tables.py"
+        "scripts/fuse_studies.py"
 
-rule fuse_chain_tables:
+rule fuse_chains:
     input:
-        IGH = "%s/alignment_all_studies_IGH.csv" % DER_DIR,
-        IGL = "%s/alignment_all_studies_IGL.csv" % DER_DIR,
-        IGK = "%s/alignment_all_studies_IGK.csv" % DER_DIR
+        IGH = "%s/{dir}/fused_studies_IGH.csv" % ALIGN_DIR,
+        IGL = "%s/{dir}/fused_studies_IGL.csv" % ALIGN_DIR,
+        IGK = "%s/{dir}/fused_studies_IGK.csv" % ALIGN_DIR
+    output:
+        "%s/{dir}/fused_studies_and_chains.csv" % ALIGN_DIR
+    log:
+        temp("logs/fuse_chains/{dir}/output")
+    script:
+        "scripts/fuse_chains.py"
+
+rule fuse_all_tables:
+    input:
+        expand("%s/{dir}/fused_studies_and_chains.csv" % ALIGN_DIR, dir=DIRS)
     output:
         "%s/alignment_all_studies_and_chains.csv" % DER_DIR
     log:
-        temp("logs/fuse_chain_tables/output")
+        temp("logs/fuse_all_tables/output")
     script:
-        "scripts/fuse_chain_tables.py"
+        "scripts/fuse_all_tables.py"
 
 rule extract_and_save_metadata:
     input:
