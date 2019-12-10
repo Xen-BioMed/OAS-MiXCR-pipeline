@@ -32,7 +32,8 @@ def return_first_line(src):
 # MAIN PART OF THE SCRIPT
 
 # Logging
-logging.basicConfig(filename="%s.log" % snakemake.log[0], level=logging.DEBUG)
+logging.basicConfig(filename="%s.log" % snakemake.log[0],
+                    filemode="w", level=logging.DEBUG)
 
 # Read all the input files from snakemake
 files = snakemake.input
@@ -42,7 +43,7 @@ logging.debug("Appending all the input files")
 # Loop over each input file, and save the first line
 df = pd.DataFrame()
 for f in files:
-    df = df.append(return_first_line(f), sort=False)
+    df = df.append(return_first_line(f))
 
 logging.debug("Success! \nPrinting first lines of df: \n")
 logging.debug(pd.DataFrame.head(df))

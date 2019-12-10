@@ -110,6 +110,7 @@ rule untar_fasta:
 # *.clna files right after alignment. Unfortunately, I do not know how to
 # make this files temp(), as they are created automatically by MiXCR.
 
+
 rule mixcr_analyze:
     input:
         "%s/{sample}.fasta" % FASTA_DIR
@@ -119,17 +120,18 @@ rule mixcr_analyze:
         "%s/{sample}.clonotypes.IGL.txt" % ALIGN_DIR
     params:
         name="%s/{sample}" % ALIGN_DIR
-    resources: cpu=100 # uses 100 "cpu" units
+    resources:
+        cpu=100 # uses 100 "cpu" units
     log:
         temp("logs/mixcr_analyze/{sample}")
     shell:
-        "mixcr -Xmx95g analyze amplicon -s hsa --starting-material rna "
+        "mixcr -Xmx195g analyze amplicon -s hsa --starting-material rna "
         "--5-end no-v-primers --3-end c-primers --adapters adapters-present "
         "--receptor-type BCR --only-productive --align '-OreadsLayout=Unknown' "
         "--assemble '-OassemblingFeatures=[CDR1,CDR2,CDR3] -OcloneClusteringParameters=null' "
-        "--export '-aaFeature CDR1 -nFeature CDR1 -aaFeature CDR2 -nFeature CDR2 -aaFeature "
-        "CDR3 -nFeature CDR3 -aaFeature VGene -cGenes -count' "
-        "{input} {params.name} > {log}.log && rm {params.name}.{{vdjca,clna}}"
+        "--export '-aaFeature CDR1 -nFeature CDR1 -aaFeature CDR2 -nFeature CDR2 "
+        "-aaFeature CDR3 -nFeature CDR3 -count' {input} {params.name} > {log}.log "
+        "&& rm {params.name}.{{vdjca,clna}}"
 
 rule fuse_studies:
     input:

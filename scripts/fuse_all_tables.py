@@ -4,7 +4,7 @@ import logging
 
 # Logging
 logging.basicConfig(filename="%s.log" % snakemake.log[0],
-                    level=logging.DEBUG)
+                    filemode="w", level=logging.DEBUG)
 
 # Save all inputs
 files = snakemake.input
@@ -13,22 +13,27 @@ files = snakemake.input
 len_files = len(files)
 
 # Loop through all inputs and save their entries in a new df
-logging.debug("Appending all the input files")
+logging.debug("Appending and saving all input files")
 
-df = pd.DataFrame()
-for i, f in enumerate(files):
-    # Log the progress every 10 files
-    if i % 10 == 0:
-        logging.debug("Progress: %s/%s" % (i, len_files))
+with open(snakemake.output[0], "a") as out:
+    for i, f in enumerate(files):
+        # Log the progress every 10 files
+        if i % 10 == 0:
+            logging.debug("Progress: %s/%s" % (i, len_files))
     
-    # Read all columns in as a string
-    df_new = pd.read_csv(f, sep="\t", dtype=str)
+        # Read all columns
+        df = pd.read_csv(
+            f,
+            dtype={"sample_id":str, "aaSeqCDR1":str, "aaSeqCDR2":str,
+                   "aaSeqCDR3":str, "nSeqCDR1":str, "nSeqCDR2":str,
+                   "nSeqCDR3":str, "allCGenes":str, "cloneCount":float,
+                   "chain":str}
+        )
 
-    # Append to the main df
-    df = df.append(df_new)
+        # Save output with/without header
+        if i is 0:
+            df.to_csv(out, index=False)
+        else:
+            df.to_csv(out, index=False, header=False)
+
 logging.debug("Success!")
-
-# Save the df to a file
-logging.debug("Saving df")
-df.to_csv(snakemake.output[0], index=False)
-logging.debug("File saved successfully!")
