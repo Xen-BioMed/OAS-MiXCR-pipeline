@@ -20,15 +20,14 @@ with open(snakemake.output[0], "a") as out:
         # Log the progress every 10 files
         if i % 10 == 0:
             logging.debug("Progress: %s/%s" % (i, len_files))
-    
+
         # Read all columns
         df = pd.read_csv(
             f,
             dtype={"sample_id":str, "aaSeqCDR1":str, "aaSeqCDR2":str,
                    "aaSeqCDR3":str, "nSeqCDR1":str, "nSeqCDR2":str,
                    "nSeqCDR3":str, "allCGenes":str, "cloneCount":float,
-                   "chain":str}
-        )
+                   "chain":str})
 
         # Save output with/without header
         if i is 0:

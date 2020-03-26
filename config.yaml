@@ -2,10 +2,10 @@
 project: "20190904_mixcr_pipeline"
 
 # The directories of derived and metadata
-der_dir: /home/djan/oas/derived_data/20190904_mixcr_pipeline
-fasta_dir: /links/groups/reddy/V_Gene_Data_Analysis/Jan_Dahinden/OAS/nucleotides
-json_dir: /links/groups/reddy/V_Gene_Data_Analysis/Jan_Dahinden/OAS/json
-align_dir: /links/groups/reddy/V_Gene_Data_Analysis/Jan_Dahinden/OAS/alignments
+der_dir: /cluster/project/reddy/OAS/derived_data/20190904_mixcr_pipeline
+fasta_dir: /cluster/project/reddy/OAS/nucleotides
+json_dir: /cluster/project/reddy/OAS/json
+align_dir: /cluster/project/reddy/OAS/alignments/20190904_mixcr_pipeline
 
 # All the directories of the different papers
 # This could be done with a simple Python command to list all directories.
