@@ -8,7 +8,6 @@ def return_first_line(src):
     """
     Returns the first line of a file as a pandas df.
     Adds an additional column 'ID' (the filename)
-    Read the first line - the meta entries.
     """
     with gzip.open(src, 'rb') as f:
         line = f.readline()
@@ -27,9 +26,6 @@ def return_first_line(src):
     df.insert(0, 'sample_id', src.split('/')[-1].split('.')[0])
 
     return(df)
-
-
-# MAIN PART OF THE SCRIPT
 
 # Logging
 logging.basicConfig(filename="%s.log" % snakemake.log[0],

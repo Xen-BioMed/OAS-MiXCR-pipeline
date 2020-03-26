@@ -3,3 +3,4 @@ __pycache__/
 ._*
 .snakemake/
 logs/
+command_line_arguments.txt

@@ -7,10 +7,7 @@ fasta_dir: /cluster/project/reddy/OAS/nucleotides
 json_dir: /cluster/project/reddy/OAS/json
 align_dir: /cluster/project/reddy/OAS/alignments/20190904_mixcr_pipeline
 
-# All the directories of the different papers
-# This could be done with a simple Python command to list all directories.
-# However, I prefer keeping this written down, so that I get an error
-# message whenever more data is added (without me knowing)!
+# Select the name of all files used for alignment
 dirs: [
     "Banerjee_2017", "Bashford_2013", "Bhiman_2015", "Bonsignori_2016",
     "Briney_2019", "Collins_2015", "Corcoran_2016", "Cui_2016", "Doria-Rose_2015",
@@ -27,7 +24,7 @@ dirs: [
 ]
 
 # The chains that are exported at the end of the MiXCR alignment step
-# If this is changed, than the MiXCR analyze command must be changed
+# If this is changed, then the MiXCR analyze command must be changed
 # as well accordingly
 chains: [
     "IGH", "IGL", "IGK"
