@@ -60,13 +60,13 @@ for i in range(0, len(DIRS)):
     sample_dict[DIRS[i]] = filenames
 
 # Make list that concatenates folder and filenames
-n_all_samples = []
+all_samples = []
 for key in sample_dict.keys():
     # Make list of current key
     list_key = [key + "/" + sample for sample in sample_dict[key]]
     
     # Add to the list
-    n_all_samples.extend(list_key)
+    all_samples.extend(list_key)
 
 
 # --------------
